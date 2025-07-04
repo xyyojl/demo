@@ -55,7 +55,10 @@ class App extends React.Component {
         return (
             <div>
                 <h1>宝可梦</h1>
-                <input type="text" onChange={this.onChangeHandler} />
+                <Input onChangeHandler={this.onChangeHandler} />
+                <Lists pokemonsLists={this.state.filteredPokemons} />
+                {/* 封装前的代码 */}
+                {/* <input type="text" onChange={this.onChangeHandler}/>
                 <ul className="ul-container">
                     {
                         this.state.filteredPokemons.map(pokemon => {
@@ -67,7 +70,7 @@ class App extends React.Component {
                             );
                         })
                     }
-                </ul>
+                </ul> */}
             </div>)
         ;
     }
