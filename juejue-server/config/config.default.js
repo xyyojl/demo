@@ -46,11 +46,24 @@ module.exports = appInfo => {
 
   config.jwt = {
     secret: 'airstar'
-  }
+  };
+
+  // egg 提供两种文件接收模式，1 是 file 直接读取，2 是 stream 流的方式
+  config.multipart = {
+    mode: 'file'
+  };
+
+  // 解决跨域
+  config.cors = {
+    origin: '*', // 允许所有跨域访问
+    credential: true, // 允许 Cookie 跨域
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
+  };
 
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
+    uploadDir: 'app/public/upload'
   };
 
   return {
