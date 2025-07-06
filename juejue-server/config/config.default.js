@@ -25,12 +25,6 @@ module.exports = appInfo => {
     domainWhiteList: ['*']
   };
 
-  // 配置 ejs
-  // 将 view 文件夹下的 .html 后缀的文件，识别为 .ejs
-  config.view = {
-    mapping: {'.html': 'ejs'} // 左边写成 .html 后缀，会自动渲染 .html 文件
-  }
-
   // 单数据库信息配置
   config.mysql = {
     client: {
@@ -42,7 +36,7 @@ module.exports = appInfo => {
       // 密码
       password: '55255526',
       // 数据库名
-      database: 'test'
+      database: 'juejue-cost'
     },
     // 是否加载到 app 上，默认开启
     app: true,
