@@ -33,10 +33,13 @@ export default defineConfig({
     proxy: {
       '/api': {
         // 当遇到 /api 路径时，将其转换成 target 的值
-        target: 'http://api.chennick.wang/api/', // 线上
-        // target: 'http://localhost:7001/api/', // 本地
+        // target: 'https://api.chennick.wang', // 线上
+        // 使用线上地址，需要加上下面这个配置，否则请求接口有问题，并且控制台有报错：Error: certificate has expired
+        // secure: false, // 跳过 SSL 证书验证
+        target: 'http://localhost:7001', // 本地
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, '') // 将 /api 重写为空
+        // 不要重写路径，保留 /api
+        // rewrite: path => path.replace(/^\/api/, '') // 将 /api 重写为空
       }
     }
   },

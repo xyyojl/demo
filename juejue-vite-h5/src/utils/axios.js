@@ -7,7 +7,7 @@ axios.defaults.baseURL = MODE == 'development' ? '/api' : 'http://api.chennick.w
 axios.defaults.withCredentials = true;
 // 用于请求头的设置
 axios.defaults.headers['X-requested-With'] = 'XMLHttpRequest';
-asxios.defaults.headers['Authorization'] = `${localStorage.getItem('token' || null)}`;
+axios.defaults.headers['Authorization'] = `${localStorage.getItem('token' || null)}`;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 axios.interceptors.response.use(res => {
