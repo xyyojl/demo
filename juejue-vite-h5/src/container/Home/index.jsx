@@ -5,6 +5,8 @@ import BillItem from '@/components/BillItem';
 import { get, REFRESH_STATE, LOAD_STATE } from '@/utils'; // Pull 组件需要的一些常量
 import PopupType from '@/components/PopupType';
 import PopupDate from '@/components/PopupDate';
+import CustomIcon from '@/components/CustomIcon';
+import PopupAddBill from '@/components/PopupAddBill';
 
 import s from './style.module.less';
 
@@ -20,6 +22,7 @@ const Home = () => {
     const [currentSelect, setCurrentSelect] = useState({}); // 当前筛选类型
     const [totalExpense, setTotalExpense] = useState(0); // 总支出
     const [totalIncome, setTotalIncome] = useState(0); // 总收入
+    const addRef = useRef(); // 添加账单 ref
 
     useEffect(() => {
         getBillList(); // 初始化
@@ -85,6 +88,11 @@ const Home = () => {
         setCurrentTime(item);
     };
 
+    // 添加账单弹窗
+    const addToggle = () => {
+        addRef.current && addRef.current.show();
+    };
+
     return <div className={s.home}>
         <div  className={s.header}>
             <div className={s.dataWrap}>
@@ -128,8 +136,10 @@ const Home = () => {
                 </Pull> : null
             }
         </div>
+        <div className={s.add} onClick={addToggle}><CustomIcon type='tianjia'/> </div>
         <PopupType ref={typeRef} onSelect={select} />
         <PopupDate ref={monthRef} mode='month' onSelect={selectMonth} />
+        <PopupAddBill ref={addRef} onReload={refreshData} />
     </div>;
 };
 
