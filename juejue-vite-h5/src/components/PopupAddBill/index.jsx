@@ -9,7 +9,7 @@ import { get, typeMap, post } from '@/utils';
 
 import s from './style.module.less';
 
-const PopupAddBill = forwardRef((props, ref) => {
+const PopupAddBill = forwardRef(({ detail = {}, onReload }, ref) => {
     // 分部分实现：账单类型、账单时间、账单金额、账单种类、备注弹窗、调用上传弹窗接口
     const [show, setShow] = useState(false); // 内部控制弹窗显示隐藏
     const [payType, setPayType] = useState('expense'); // 支出或收入类型
@@ -22,6 +22,29 @@ const PopupAddBill = forwardRef((props, ref) => {
     const [remark, setRemark] = useState(''); // 备注
     const [showRemark, setShowRemark] = useState(false); // 备注输入框展示控制
 
+    /* 
+        编辑事件实现思路：
+        在点击「编辑」按钮之后，我们会唤起之前写好的「添加账单弹窗」，然后将账单 detail 参数通过 props 传递给弹窗组件，
+        组件在接收到 detail 时，将信息初始化给弹窗给的相应参数。
+
+        实现细节：
+        首先，通过 setXXX 将 detail 的数据依次设置初始值；其次，账单种类需要判断是否是编辑或是新建；
+        最后，修改添加账单按钮，如果是「编辑」操作，给 params 参数添加一个 id，并且调用的接口变成 /api/bill/update。
+    */
+    const id = detail && detail.id; // 外部传进来的账单详情 id
+
+    useEffect(() => {
+        if (detail.id) {
+            setPayType(detail.pay_type == 1 ? 'expense' : 'income');
+            setCurrentType({
+                id: detail.type_id,
+                name: detail.type_name
+            });
+            setRemark(detail.remark);
+            setAmount(detail.amount);
+            setDate(dayjs(Number(detail.date)).$d);
+        }
+    }, [detail]);
 
     // 通过 forwardRef 拿到外部传入的 ref，并添加属性，使得付组件可以通过 ref 控制子组件
     if (ref) {
@@ -88,16 +111,24 @@ const PopupAddBill = forwardRef((props, ref) => {
             pay_type: payType == 'expense' ? 1 : 2, // 账单类型传 1 或 2
             remark: remark || '' // 备注
         };
-        const result = await post('/bill/add', params);
-        // 重置数据
-        setAmount('');
-        setPayType('expense');
-        setCurrentType(expense[0])
-        setDate(new Date());
-        setRemark('');
-        Toast.show('添加成功');
+        if (id) {
+            params.id = id;
+            // 如果有 id 需要调用详情更新接口
+            const result = await post('/bill/update', params);
+            Toast.show('修改成功');
+        } else {
+            // 新增账单
+            const result = await post('/bill/add', params);
+            // 重置数据
+            setAmount('');
+            setPayType('expense');
+            setCurrentType(expense[0])
+            setDate(new Date());
+            setRemark('');
+            Toast.show('添加成功');
+        }
         setShow(false);
-        if (props.onReload) props.onReload();
+        if (onReload) onReload();
     };
 
     useEffect(async () => {
@@ -106,7 +137,10 @@ const PopupAddBill = forwardRef((props, ref) => {
         const _income = list.filter(i => i.type == 2); // 收入类型
         setExpense(_expense);
         setIncome(_income);
-        setCurrentType(_expense[0]); // 新建账单，类型默认是支出类型数组的第一项
+        // 没有 id 的情况下，说明是新建账单
+        if (!id) {
+            setCurrentType(_expense[0]); // 新建账单，类型默认是支出类型数组的第一项
+        }
     }, []);
 
     return <Popup
