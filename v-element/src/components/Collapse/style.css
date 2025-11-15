@@ -45,12 +45,6 @@
   border-bottom: 1px solid var(--vk-collapse-border-color);
   padding-bottom: 25px;
 }
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 1s ease-in-out;
-}
-.fade-enter-to, .fade-leave-from {
-  opacity: 1;
+.slide-enter-active, .slide-leave-active {
+  transition: height 1s ease-in-out;
 }
