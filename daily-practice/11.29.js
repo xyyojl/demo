@@ -238,15 +238,18 @@ window.length 是 10
 
 // AI评分：80-85分
 /* 
+你的代码现状：
+    Debounce: 没问题，标准版。
+    Throttle: 没问题，时间戳版（首触发，会丢尾）。
 面试建议：
-先把你的这两段代码背熟（这是保底）。
-防抖：准备好应对“如何立刻执行一次”的追问。
-节流：主动告诉面试官，“我写的是时间戳版，特点是第一次会立刻执行。如果业务需要保证最后一次操作也必须执行（比如存库），可以用定时器版。” —— 这句话能证明你懂业务场景。
+    先把你的这两段代码背熟（这是保底）。
+    防抖：准备好应对“如何立刻执行一次”的追问。
+    节流：主动告诉面试官，“我写的是时间戳版，特点是第一次会立刻执行。如果业务需要保证最后一次操作也必须执行（比如存库），可以用定时器版。” —— 这句话能证明你懂业务场景。
 
 我刚才写的是时间戳版，适合首屏加载等需要立即响应的场景。但它有丢失最后一次操作的风险。如果要兼顾首尾，
 我们可以结合时间戳和定时器：在 delay 时间内用时间戳控制不触发，但在 delay 结束的边缘设置一个 setTimeout 来兜底执行最后一次。
 */
-function debounce(fn, delay) {
+/* function debounce(fn, delay) {
     let timer = null;
     return function(...args) {
         const context = this;
@@ -266,4 +269,14 @@ function throttle(fn, delay) {
             lastTime = now;
         }
     }
-}
+} */
+
+// 原型链
+function Person() {}
+const p = new Person();
+
+// 1. p.__proto__ 等于什么？p.__proto__ === Person.prototype
+// 2. Person.__proto__ 等于什么？Person.__proto__ === Function.prototype
+// 3. Person.prototype.__proto__ 等于什么？Person.prototype.__proto__ === Object.prototype
+// 4. Function.__proto__ 等于什么？Function.__proto__ === Function.prototype
+// 5. Object.__proto__ 等于什么？Object.__proto__ === Function.prototype
