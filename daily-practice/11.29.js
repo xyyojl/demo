@@ -151,3 +151,119 @@ console.log(uniqueByField(users, 'id'));  */
 白银段位： 使用 filter + indexOf。
 王者段位： 使用 Map（性能最好，且能区分 '1' 和 1）。
  */
+
+// this 自测
+/* var length = 10;
+function fn() {
+    console.log(this.length);
+}
+
+var obj = {
+    length: 5,
+    method: function (fn) {
+        fn(); // 第一问
+        arguments[0](); // 第二问（最坑的一问）
+    }
+};
+
+obj.method(fn, 1); */
+/* 
+第一问 fn() 这是独立调用（默认绑定）。
+this window
+window.length 是 10
+第二问「做错了」
+this window
+window.length 是 10
+输出结果「做错了」
+10 10
+输出结果「正确」
+10 2
+解析：
+第二问 arguments[0]()：
+    这里 arguments[0] 实际上就是传进去的 fn。
+    调用形式是 arguments[0]()，相当于 arguments.0()（虽然语法不对，但逻辑是这样的）。
+    这是隐式绑定！调用者是 arguments 对象。
+    所以 this 指向 arguments。
+    arguments.length 是多少？你传了 fn 和 1 两个参数，所以长度是 2。
+    输出：2。
+*/
+
+/* 
+手写防抖 (Debounce)
+场景： 搜索框输入（用户停下来才发送请求）。
+口诀： “你敢动，我就清零重新计时。”
+*/
+
+// 面试标准版
+/* function debounce(fn, delay) {
+    let timer = null; // 1. 利用闭包保存定时器
+
+    // 返回一个新函数
+    return function(...args) {
+        // 2. 保存当前的 this （Context）
+        const context = this;
+        // 3. 如果定时器存在，说明还没到时间又触发了，赶紧清空之前的
+        if (timer) clearTimeout(timer);
+        // 4. 重新设置定时器
+        timer = setTimeout(() => {
+            // 5. 执行函数，利用 apply 修正 this 指向，并传递参数
+            fn.apply(context, args);
+        }, delay);
+    }
+} */
+
+/* 
+手写节流 (Throttle)
+场景： 滚动条监听、窗口 resize（每隔一段时间执行一次）。
+口诀： “别急，技能 CD 还没好。”
+*/
+
+// 【面试标准版 - 时间戳写法】(这种写法最简单，也好记)
+/* function throttle(fn, delay) {
+    let lastTime = 0; // 1. 记录上一次执行的时间
+
+    return function(...args) {
+        const now = Date.now(); // 2. 获取当前的时间
+
+        // 3. 如果（当前时间 - 上次时间）大于 设置的间隔
+        if (now - lastTime >= delay) {
+            // 4. 执行函数，修正 this
+            fn.apply(this, args);
+            // 5. 更新上次执行时间
+            lastTime = now;
+        }
+    }
+} */
+
+
+// AI评分：80-85分
+/* 
+面试建议：
+先把你的这两段代码背熟（这是保底）。
+防抖：准备好应对“如何立刻执行一次”的追问。
+节流：主动告诉面试官，“我写的是时间戳版，特点是第一次会立刻执行。如果业务需要保证最后一次操作也必须执行（比如存库），可以用定时器版。” —— 这句话能证明你懂业务场景。
+
+我刚才写的是时间戳版，适合首屏加载等需要立即响应的场景。但它有丢失最后一次操作的风险。如果要兼顾首尾，
+我们可以结合时间戳和定时器：在 delay 时间内用时间戳控制不触发，但在 delay 结束的边缘设置一个 setTimeout 来兜底执行最后一次。
+*/
+function debounce(fn, delay) {
+    let timer = null;
+    return function(...args) {
+        const context = this;
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+            fn.apply(context, args);
+        }, delay);
+    }
+}
+
+function throttle(fn, delay) {
+    let lastTime = 0;
+    return function(...args) {
+        const now = Date.now();
+        if (now - lastTime >= delay) {
+            fn.apply(this, args);
+            lastTime = now;
+        }
+    }
+}
