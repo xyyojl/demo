@@ -377,3 +377,67 @@ console.log(result.self === obj);    // 必须为 false (引用的必须是新�
     })(arr, depth);
     return result;
 }; */
+
+/* 
+深拷贝
+核心：递归 + WeakMap
+关键点：先查 WeakMap，如果有直接返回；没有再创建、先登记、再递归
+*/
+
+/* function deepClone(target, map = new WeakMap()) {
+    if (typeof target !== 'object' || target === null) return target;
+    if (map.has(target)) return map.get(target);
+
+    const cloneTarget = Array.isArray(target) ? [] : {};
+    map.set(target, cloneTarget);
+
+    for (const key in target) {
+        if (target.hasOwnProperty(key)) {
+            cloneTarget[key] = deepClone(target[key], map);
+        }
+    }
+    return cloneTarget;
+};
+
+const obj = {
+    a: 1,
+    b: [2, 3],
+    c: { d: 4 }
+};
+obj.self = obj; // 循环引用
+
+const result = deepClone(obj);
+console.log(result.self === result); // 必须为 true
+console.log(result.self === obj);    // 必须为 false (引用的必须是新对象) */
+
+/* 
+数组去重
+核心：Set 或 Map
+关键点：如果用 Map，利用 !map.has(key) 来过滤
+*/
+
+/* const arr = [1, 2, 3, 2, 1, '1', '1'];
+// 预期结果：[1, 2, 3, '1']
+const unique1 = (arr) => [...new Set(arr)];
+console.log(unique1(arr));
+
+const unique2 = (arr) => {
+    return arr.filter((item, index) => arr.indexOf(item) === index);
+}
+console.log(unique1(arr));
+
+const unique3 = (arr) => {
+    const res = [];
+    const seen = new Map();
+
+    for (let i = 0; i < arr.length; i++) {
+        const item = arr[i];
+        // 如果 Map 里没有，就放进去
+        if (!seen.has(item)) {
+            seen.set(item, true);
+            res.push(item);
+        }
+    }
+    return res;
+}
+console.log(unique1(arr)); */
