@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>No Build Step Vue 3</title>
+</head>
+<body>
+    <div id="app">
+        <p>当前计数：{{ count }}</p>
+        <button @click="increment">+1</button>
+        <button @click="reset">重置</button>
+
+        <hr>
+        <button @click="addLike">点赞 {{ likeCount }}</button>
+        <button @click="addStar">收藏 {{ starCount }}</button>
+    </div>
+
+    <!-- 1. 定义导入地图 (Import Map) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+    }
+    </script>
+
+    <!-- 2. 你的业务代码 -->
+    <script type="module">
+        // 你看，这里可以直接写 'vue' 了！就像在脚手架里一样！
+        import { createApp, ref, onMounted } from 'vue';
+        import { useCounter } from './useCounter.js';
+
+        // 也可以引入你刚才手写的 useCounter
+        // 假设你把 useCounter.js 放在同级目录下
+        // import { useCounter } from './useCounter.js'; 
+
+        const App = {
+            setup() {
+                // 场景1: 基础使用
+                const { count, increment, reset } = useCounter(10);
+
+                // 场景2:复用逻辑（防止命名冲突）
+                // 比如我有两个计数器，一个记录点赞，一个记录收藏
+                const { count: likeCount, increment: addLike } = useCounter(0);
+                const { count: starCount, increment: addStar } = useCounter(0);
+
+                return {
+                    count,
+                    increment,
+                    reset,
+                    likeCount,
+                    addLike,
+                    starCount,
+                    addStar
+                };
+            }
+        };
+
+        createApp(App).mount('#app');
+        /* 
+            为什么比 Mixins 好？
+            1. 来源清晰
+            2. 无命名冲突
+            3. 更好的类型推导
+        */
+    </script>
+</body>
+</html>

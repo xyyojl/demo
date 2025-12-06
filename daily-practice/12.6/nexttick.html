@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue nextTick</title>
+</head>
+<body>
+    <div id="app">
+        <button id="counter" @click="increment">{{ count }}</button>
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp, ref, nextTick } = Vue;
+        createApp({
+            setup() {
+                const count = ref(0);
+
+                async function increment() {
+                    count.value++;
+
+                    // DOM 还未更新
+                    console.log(document.getElementById('counter').textContent); // 0
+
+                    await nextTick();
+                    // DOM 此时已经更新
+                    console.log(document.getElementById('counter').textContent); // 1
+                    
+                }
+                return {
+                    count,
+                    increment
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

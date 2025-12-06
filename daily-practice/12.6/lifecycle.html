@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue 3 生命周期演示 (No CLI)</title>
+    <!-- 1. 引入 Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .box { border: 1px solid #ccc; padding: 15px; margin: 10px; border-radius: 5px; }
+        .parent { background-color: #f0f8ff; }
+        .child { background-color: #ffe4e1; }
+        button { cursor: pointer; padding: 5px 10px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <script>
+        const { createApp, ref, onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted } = Vue;
+
+        // --- 子组件定义 ---
+        const ChildComponent = {
+            template: `
+                <div class="box child">
+                    <h3>👶 我是子组件</h3>
+                    <p>子组件数据: {{ count }}</p>
+                    <button @click="count++">更新子组件</button>
+                </div>
+            `,
+            setup() {
+                console.log('%c[Child] setup (相当于 created)', 'color: red');
+                
+                const count = ref(0);
+
+                // 挂载阶段
+                onBeforeMount(() => console.log('%c[Child] onBeforeMount', 'color: red'));
+                onMounted(() => console.log('%c[Child] onMounted', 'color: red'));
+
+                // 更新阶段
+                onBeforeUpdate(() => console.log('%c[Child] onBeforeUpdate', 'color: red'));
+                onUpdated(() => console.log('%c[Child] onUpdated', 'color: red'));
+
+                // 卸载阶段 (注意：Vue3 改名了，不是 destroy)
+                onBeforeUnmount(() => console.log('%c[Child] onBeforeUnmount', 'color: red'));
+                onUnmounted(() => console.log('%c[Child] onUnmounted', 'color: red'));
+
+                return { count };
+            }
+        };
+
+        // --- 父组件定义 ---
+        // 可以通过注释掉子组件，只看单个组件的生命周期
+        const ParentComponent = {
+            components: { ChildComponent },
+            template: `
+                <div class="box parent">
+                    <h2>👴 我是父组件</h2>
+                    <button @click="showChild = !showChild">
+                        {{ showChild ? '销毁' : '创建' }} 子组件 (v-if)
+                    </button>
+                    <button @click="parentCount++">更新父组件</button>
+                    <p>父组件数据: {{ parentCount }}</p>
+                    
+                    <hr>
+                    <!-- v-if 触发子组件的挂载与卸载 -->
+                    <child-component v-if="showChild"></child-component>
+                </div>
+            `,
+            setup() {
+                console.log('%c[Parent] setup (相当于 created)', 'color: blue');
+
+                const showChild = ref(true);
+                const parentCount = ref(0);
+
+                // 挂载阶段
+                onBeforeMount(() => console.log('%c[Parent] onBeforeMount', 'color: blue'));
+                onMounted(() => console.log('%c[Parent] onMounted', 'color: blue'));
+
+                // 更新阶段
+                onBeforeUpdate(() => console.log('%c[Parent] onBeforeUpdate', 'color: blue'));
+                onUpdated(() => console.log('%c[Parent] onUpdated', 'color: blue'));
+
+                return { showChild, parentCount };
+            }
+        };
+
+        // 启动应用
+        createApp(ParentComponent).mount('#app');
+        /* 
+        核心现象分析
+        
+        场景1:页面刚刷新（初始化加载）
+        这是面试最高频考点：父子组件的执行顺序（洋葱模型）。
+        
+        控制台输出顺序：
+        1. [Parent] setup（父初始化）
+        2. [Parent] onBeforeMount（父准备挂载）
+        3. [Child] setup（子初始化）
+        4. [Child] onBeforeMount（子准备挂载）
+        5. [Child] onMounted（子先挂载完！）
+        6. [Parent] onMounted（父最后挂载完）
+
+        理解：就像盖房子，必须先把里面的砖头（子组件）砌好，整面墙（父组件）才算砌完。
+
+        场景2:点击“更新父组件”按钮
+        
+        控制台输出顺序：
+        1. [Parent] onBeforeUpdate（父组件数据发生变化，DOM 尚未更新）
+        1. [Parent] onUpdated（父组件数据变化，DOM 更新后调用）
+
+        注意：此时子组件不会触发任何钩子！因为 Vue 的更新是组件级别的，父变了子不一定变。
+
+        场景 3：点击“销毁子组件” (v-if = false)
+        这是考察 Vue 3 新钩子命名的地方。
+
+        控制台输出顺序：
+        1. [Parent] onBeforeUpdate（父组件要移除 DOM 节点，所以父先动）
+        2. [Child] onBeforeUnmount（子组件准备卸载）
+        3. [Child] onUnmounted（子组件卸载完毕）
+        4. [Parent] onUpdated（父组件更新完毕）
+
+        */
+    </script>
+</body>
+</html>
