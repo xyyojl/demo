@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- 导航区域 -->
+    <nav>
+        <!-- 注意：href 必须带 # -->
+        <a href="#/">首页</a>
+        <a href="#/about">关于</a>
+        <a href="#/user">用户</a>
+    </nav>
+
+    <!-- 视图渲染区域 -->
+    <div id="app"></div>
+
+    <script src="./index.js"></script>
+    <script>
+        // 1. 实例化 Router
+        const router = new HashRouter();
+        const container = document.getElementById('app');
+
+        // 2. 注册路由（模拟 Vue 的 routes 配置）
+        router.route('/', () => {
+            container.innerHTML = '<h1>🏠 这是首页</h1>';
+        });
+        router.route('/about', () => {
+            container.innerHTML = '<h1>📖 关于我们</h1>';
+        });
+        router.route('/user', () => {
+            container.innerHTML = '<h1>👤 用户中心</h1>';
+        });
+    </script>
+</body>
+</html>

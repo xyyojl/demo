@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <nav>
+        <!-- 注意：这里不能直接写 href="/about"，否则会发生真跳转（页面刷新） -->
+        <!-- 我们需要拦截点击事件 -->
+        <a href="javascript:;" onclick="router.push('/')">首页</a>
+        <a href="javascript:;" onclick="router.push('/about')">关于</a>
+        <a href="javascript:;" onclick="router.push('/user')">用户</a>
+    </nav>
+
+    <div id="app"></div>
+
+    <script src="./index.js"></script>
+    <script>
+        const router = new HistoryRouter();
+        const container = document.getElementById('app');
+
+        // 注册路由
+        router.route('/', () => container.innerHTML = '<h1>🏠 首页</h1>');
+        router.route('/about', () => container.innerHTML = '<h1>📖 关于</h1>');
+        router.route('/user', () => container.innerHTML = '<h1>👤 用户</h1>');
+    </script>
+</body>
+</html>
