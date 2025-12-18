@@ -8,7 +8,7 @@
 
 /* 
 疑问点：
-...agrs 的作用是什么？
+...args 的作用是什么？
 在 myNew 这个函数里，...args 用到了 ES6 的两个特性：剩余参数 (Rest Parameters) 和 展开语法 (Spread Syntax)。
 它的作用是：“照单全收，原样传递”。
 
@@ -54,13 +54,13 @@ Object.create(proto) 是一个静态方法，它创建一个新对象，使用�
 */
 
 // 标准代码
-/* function myNew(Constructor, ...agrs) {
+/* function myNew(Constructor, ...args) {
     // 1. 创建一个新对象，并将其 __proto__ 链接到构造函数的 prototype
     // 这一步把 1 和 2 合并了
     const obj = Object.create(Constructor.prototype);
 
     // 2. 执行构造函数，绑定 this
-    const result = Constructor.apply(obj, agrs);
+    const result = Constructor.apply(obj, args);
 
     // 3. 处理返回值
     // 如果构造函数返回的是对象或函数，则返回该结果；否则返回新创建的 obj
