@@ -1,6 +1,6 @@
 // 编写 Schema 配置
 // 定义表单的配置项
-export const fields = [
+export const formSchema = [
     // --- 组件 1：普通输入框 ---
     {
         // 1. 组件类型：字符串映射，将来会在 <component :is> 中使用
