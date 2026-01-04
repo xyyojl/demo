@@ -5,6 +5,6 @@ import { reactive } from 'vue';
 export const createInitModel = () => reactive({
     username: '',
     role: 'user', // 默认值
-    adminKey: '',
+    adminKey: '', // 这个字段虽然在 Card 里，但数据还是挂在一级
     isPublic: false
 });
