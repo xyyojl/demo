@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02-06-复选项选择测试题</title>
+</head>
+
+<body>
+    <div id="app">
+        <input type="text" v-model="fruitText"> <br>
+        <input type="checkbox" v-model="fruitList" value="西瓜">西瓜 <br>
+        <input type="checkbox" v-model="fruitList" value="苹果">苹果 <br>
+        <input type="checkbox" v-model="fruitList" value="哈密瓜">哈密瓜 <br>
+        <input type="checkbox" v-model="fruitList" value="芒果">芒果 <br>
+    </div>
+    <script src="./vue.global.js"></script>
+    <script>
+        let vm = Vue.createApp({
+            data() {
+                return {
+                    fruitList: ['苹果', '芒果']
+                }
+            },
+            computed: {
+                fruitText: {
+                    get() {
+                        return this.fruitList.join('、');
+                    },
+                    set(value) {
+                        this.fruitList = value.split('、');
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
