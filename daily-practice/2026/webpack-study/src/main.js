@@ -1,2 +1,2 @@
 import str from './hello.js';
-console.log(str + 'world!');
+console.log(str + ' world!!!');
