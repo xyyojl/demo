@@ -10,6 +10,18 @@ module.exports = {
     },
     mode: 'development',
     devtool: 'inline-source-map',
+    module: {
+        rules: [
+            {
+                test: /\.css$/i,
+                use: ['style-loader', 'css-loader']
+            },
+            {
+                test: /\.(png|jpg|gif)$/i,
+                type: 'asset/resource'
+            }
+        ]
+    },
     plugins: [
         new HtmlWebpackPlugin({
             template: './public/index.html',
