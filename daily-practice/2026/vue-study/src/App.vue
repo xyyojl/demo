@@ -6,11 +6,15 @@
   <ElSwitch v-model="value4" /> {{ value4 ? '开' : '关' }}
   <h2>函数防抖指令</h2>
   <input v-debouncing="handleChange" type="text">
+  <h2>el-badge徽章组件</h2>
+  <!-- <el-badge :value="12">徽章</el-badge> -->
+  <el-badge :value="5" type="primary">徽章</el-badge>
 </template>
 
 <script>
 import ElRate from './components/ElRate.vue';
 import ElSwitch from './components/ElSwitch.vue';
+import ElBadge from './components/ElBadge.vue';
 export default {
   name: 'App',
   data() {
@@ -23,7 +27,8 @@ export default {
   },
   components: {
     ElRate,
-    ElSwitch
+    ElSwitch,
+    ElBadge
   },
   methods: {
     handleChange() {
