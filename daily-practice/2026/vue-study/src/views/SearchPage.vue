@@ -1,7 +1,7 @@
 <template>
     <div class="search-input">
         <i class="iconfont iconsearch"></i>
-        <input type="text" placeholder="搜索歌曲" v-model="searchWord" @input="handleToSuggest" />
+        <input type="text" placeholder="搜索歌曲" v-model="searchWord" @input="handleToSuggest" @keydown.enter="handleToResult($event)" />
         <i class="iconfont iconguanbi" v-if="searchWord" @click="handleToClose"></i>
     </div>
     <template v-if="searchType === 1">
@@ -18,17 +18,12 @@
     </template>
     <template v-else-if="searchType === 2">
         <div class="search-result">
-            <div class="search-result-item">
+            <div
+                class="search-result-item"
+                v-for="item in resultList"
+                :key="item.id">
                 <div class="search-result-word">
-                    <div>少年</div>
-                    <div>许巍 - 爱如少年</div>
-                </div>
-                <i class="iconfont iconbofang"></i>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-word">
-                    <div>少年</div>
-                    <div>许巍 - 爱如少年</div>
+                    <div>{{ item.name }}</div>
                 </div>
                 <i class="iconfont iconbofang"></i>
             </div>
@@ -40,7 +35,8 @@
             <div
                 class="search-suggest-item"
                 v-for="item in suggestList"
-                :key="item.id">
+                :key="item.id"
+                @click="handleItemResult(item.name)">
                 <i class="iconfont iconsearch"></i>{{ item.name }}
             </div>
         </div>
@@ -93,8 +89,36 @@ function useSuggest() {
     };
 }
 
+function useResult() {
+    let resultList = ref([]);
+    // 输入回车，显示搜索结果的内容
+    let handleToResult = () => {
+        if (!searchWord.value) return;
+        axios.get(`/api/search?keywords=${searchWord.value}`)
+            .then(res => {
+                let result = res.data.result;
+                if (!result.songs) {
+                    return;
+                }
+                searchType.value = 2;
+                resultList.value = result.songs;
+            })
+    };
+    // 点击搜索建议页的某一项
+    const handleItemResult = (name) => {
+        searchWord.value = name;
+        handleToResult();
+    };
+    return {
+        resultList,
+        handleToResult,
+        handleItemResult
+    };
+}
+
 const { searchType, searchWord, handleToClose } = useSreach();
 const { suggestList, handleToSuggest } = useSuggest();
+const { resultList, handleToResult, handleItemResult } = useResult();
 </script>
 
 <style scoped>
