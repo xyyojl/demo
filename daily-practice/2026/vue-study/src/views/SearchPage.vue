@@ -1,8 +1,8 @@
 <template>
     <div class="search-input">
         <i class="iconfont iconsearch"></i>
-        <input type="text" placeholder="搜索歌曲">
-        <i class="iconfont iconguanbi"></i>
+        <input type="text" placeholder="搜索歌曲" v-model="searchWord" @input="handleToSuggest" />
+        <i class="iconfont iconguanbi" v-if="searchWord" @click="handleToClose"></i>
     </div>
     <template v-if="searchType === 1">
         <div class="search-history">
@@ -36,12 +36,12 @@
     </template>
     <template v-else-if="searchType === 3">
         <div class="search-suggest">
-            <div class="search-suggest-head">搜索“ 少年 ”</div>
-            <div class="search-suggest-item">
-                <i class="iconfont iconsearch"></i>少年抖音
-            </div>
-            <div class="search-suggest-item">
-                <i class="iconfont iconsearch"></i>少年抖音
+            <div class="search-suggest-head">搜索“ {{ searchWord }} ”</div>
+            <div
+                class="search-suggest-item"
+                v-for="item in suggestList"
+                :key="item.id">
+                <i class="iconfont iconsearch"></i>{{ item.name }}
             </div>
         </div>
     </template>
@@ -50,8 +50,51 @@
 <script setup>
 import { ref } from 'vue';
 import '@/assets/searchIcon/iconfont.css';
+import axios from 'axios';
 
-let searchType = ref(1);
+function useSreach() {
+    let searchWord = ref('');
+    let searchType = ref(1);
+    function handleToClose() {
+        searchWord.value = '';
+        searchType.value = 1;
+    }
+    return {
+        searchType,
+        searchWord,
+        handleToClose
+    };
+}
+
+function useSuggest() {
+    let suggestList = ref([]);
+    let handleToSuggest = () => {
+        if (searchWord.value) {
+            searchType.value = 3;
+            axios.get(`/api/search/suggest?keywords=${searchWord.value}`)
+                .then(res => {
+                    let result = res.data.result;
+                    if (!result.order) {
+                        return;
+                    }
+                    let tmp = [];
+                    for (let i = 0; i < result.order.length; i++) {
+                        tmp.push(...result[result.order[i]]);
+                    }
+                    suggestList.value = tmp;
+                })
+        } else {
+            searchType.value = 1;
+        }
+    };
+    return {
+        suggestList,
+        handleToSuggest
+    };
+}
+
+const { searchType, searchWord, handleToClose } = useSreach();
+const { suggestList, handleToSuggest } = useSuggest();
 </script>
 
 <style scoped>
