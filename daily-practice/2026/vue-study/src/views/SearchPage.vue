@@ -1,18 +1,17 @@
 <template>
     <div class="search-input">
         <i class="iconfont iconsearch"></i>
-        <input type="text" placeholder="搜索歌曲" v-model="searchWord" @input="handleToSuggest" @keydown.enter="handleToResult($event)" />
+        <input type="text" placeholder="搜索歌曲" v-model="searchWord" @input="handleToSuggest" @keydown.enter="handleToResult($event), handleAddHistory($event)" />
         <i class="iconfont iconguanbi" v-if="searchWord" @click="handleToClose"></i>
     </div>
     <template v-if="searchType === 1">
         <div class="search-history">
             <div class="search-history-head">
                 <span>历史记录</span>
-                <i class="iconfont iconlajitong"></i> 
+                <i class="iconfont iconlajitong" @click="handleToClear"></i> 
             </div>
             <div class="search-history-list">
-                <div>稻香</div>
-                <div>双节棍</div>
+                <div v-for="item, index in historyList" :key="index" @click="handleItemResult(item)">{{ item }}</div>
             </div>
         </div>
     </template>
@@ -36,7 +35,7 @@
                 class="search-suggest-item"
                 v-for="item in suggestList"
                 :key="item.id"
-                @click="handleItemResult(item.name)">
+                @click="handleItemResult(item.name), handleAddHistory(item.name)">
                 <i class="iconfont iconsearch"></i>{{ item.name }}
             </div>
         </div>
@@ -116,9 +115,45 @@ function useResult() {
     };
 }
 
+const useHistory = () => {
+    const key = 'searchHistory';
+    let getSearchHistory = () => {
+        return JSON.parse(localStorage.getItem(key) || '[]');
+    };
+    let setSearchHistory = (historyList) => {
+        localStorage.setItem(key, JSON.stringify(historyList));
+    };
+    let clearSearchHistory = () => {
+        localStorage.removeItem(key);
+    };
+    const historyList = ref(getSearchHistory());
+    const handleAddHistory = (arg) => {
+        // 两处使用：搜索歌曲回车、点击搜索建议的某一项
+        if (!searchWord.value) {
+            return;
+        }
+        if (typeof arg === 'string') {
+            searchWord.value = arg;
+        }
+        historyList.value.unshift(searchWord.value);
+        historyList.value = [...new Set(historyList.value)];
+        setSearchHistory(historyList.value);
+    };
+    const handleToClear = () => {
+        historyList.value = [];
+        clearSearchHistory();
+    };
+    return {
+        historyList,
+        handleAddHistory,
+        handleToClear
+    };
+}
+
 const { searchType, searchWord, handleToClose } = useSreach();
 const { suggestList, handleToSuggest } = useSuggest();
 const { resultList, handleToResult, handleItemResult } = useResult();
+const { historyList, handleAddHistory, handleToClear } = useHistory();
 </script>
 
 <style scoped>
