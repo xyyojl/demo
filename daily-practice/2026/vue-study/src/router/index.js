@@ -2,11 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Todo from '@/views/Todo.vue';
 import Complete from '@/views/Complete.vue';
 import Incomplete from '@/views/Incomplete.vue';
+import SearchPage from '@/views/SearchPage.vue';
 
 const routes = [
     {
         path: '/',
-        redirect: '/todo'
+        // redirect: '/todo'
+        component: SearchPage
     },
     {
         path: '/todo',
