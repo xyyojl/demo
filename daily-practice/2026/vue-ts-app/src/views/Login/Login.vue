@@ -5,9 +5,19 @@
 </template>
 
 <script setup lang="ts">
-// 测试axios二次封装
+/* // 测试axios二次封装
 import http from '@/utils/http'
 http.post('/users/login', {
+  email: 'huangrong@imooc.com',
+  pass: 'huangrong'
+}).then(res => {
+  console.log(res.data);
+}) */
+
+import { useUsersStore } from '@/stores/users';
+const usersStore = useUsersStore();
+
+usersStore.loginAction({
   email: 'huangrong@imooc.com',
   pass: 'huangrong'
 }).then(res => {
