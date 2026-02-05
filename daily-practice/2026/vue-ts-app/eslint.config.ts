@@ -20,4 +20,12 @@ export default defineConfigWithVueTs(
   vueTsConfigs.recommended,
 
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
+  {
+    // 明确指定对 .vue 文件生效
+    files: ['**/*.vue'],
+    rules: {
+      // 在这里关闭单单词组件名校验
+      'vue/multi-word-component-names': 'off',
+    },
+  }
 )
