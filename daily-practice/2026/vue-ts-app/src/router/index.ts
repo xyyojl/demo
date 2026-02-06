@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
+import { useUsersStore } from '@/stores/users'
+import { storeToRefs } from 'pinia'
 
 const Login = () => import('@/views/Login/Login.vue')
 const Home = () => import('@/views/Home/Home.vue')
@@ -86,6 +88,24 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const usersStore = useUsersStore()
+  const { token } = storeToRefs(usersStore)
+  if (to.meta.auth) { // 需要权限
+    if (token.value) {
+      next()
+    } else {
+      next({ name: 'login' }) // 也可以写成 next('/login')，下同
+    }
+  } else {
+    if (token.value && to.path === '/login') {
+      next({ name: 'home' })
+    } else {
+      next()
+    }
+  }
 })
 
 export default router
