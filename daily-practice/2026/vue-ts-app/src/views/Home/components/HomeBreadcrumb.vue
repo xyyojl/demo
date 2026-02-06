@@ -1,12 +1,15 @@
 <template>
   <el-breadcrumb separator="/">
-    <el-breadcrumb-item>promotion list</el-breadcrumb-item>
-    <el-breadcrumb-item>promotion detail</el-breadcrumb-item>
+     <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.name">{{ item.meta?.title }}</el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
+const breadcrumbs = computed(() => route.matched)
 </script>
 
 <style scoped lang="scss">
