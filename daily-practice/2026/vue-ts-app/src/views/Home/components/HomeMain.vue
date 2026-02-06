@@ -1,6 +1,6 @@
 <template>
-  <div>
-    hello main
+  <div class="home-main">
+    <RouterView />
   </div>
 </template>
 
@@ -9,5 +9,10 @@
 </script>
 
 <style scoped lang="scss">
-
+.home-main {
+  margin-top: 20px;
+  background: #fff;
+  flex-grow: 1;
+  position: relative;
+}
 </style>
