@@ -1,36 +1,43 @@
 <template>
-  <el-menu default-active="1-1">
-    <el-sub-menu index="1">
+  <el-menu :default-active="route.path" router>
+    <el-sub-menu v-for="item in menus" :key="item.path" :index="item.path">
       <template #title>
         <el-icon>
-          <location />
+          <component :is="item.meta?.icon" />
         </el-icon>
-        <span>考勤管理</span>
+        <span>{{ item.meta?.title }}</span>
       </template>
-      <el-menu-item index="1-1">
+      <el-menu-item v-for="itemChild in item.children" :key="item.path + itemChild.path" :index="item.path + itemChild.path">
         <el-icon>
-          <location />
+          <component :is="itemChild.meta?.icon" />
         </el-icon>
-        <span>在线打卡签到</span>
-      </el-menu-item>
-      <el-menu-item index="1-2">
-        <el-icon>
-          <location />
-        </el-icon>
-        <span>异常考勤查询</span>
-      </el-menu-item>
-      <el-menu-item index="1-3">
-        <el-icon>
-          <location />
-        </el-icon>
-        <span>添加考勤审批</span>
+        <span>{{ itemChild.meta?.title }}</span>
       </el-menu-item>
     </el-sub-menu>
   </el-menu>
 </template>
 
 <script setup lang="ts">
+import _ from 'lodash'
+import { useRouter, useRoute } from 'vue-router'
+import type { RouteRecordName } from 'vue-router';
+import { useUsersStore } from '@/stores/users';
+import { storeToRefs } from 'pinia';
 
+const usersStore = useUsersStore()
+const { infos } = storeToRefs(usersStore)
+const permission = infos.value.permission
+
+const router = useRouter()
+const route = useRoute()
+
+const menus = _.cloneDeep(router.options.routes).filter(item => {
+  item.children = item.children?.filter(child => {
+    return child.meta?.menu && (permission as RouteRecordName[]).includes(child.name)
+  })
+  // 过滤出有子菜单并且有权限的菜单
+  return item.meta?.menu && (permission as RouteRecordName[]).includes(item.name)
+})
 </script>
 
 <style scoped lang="scss">
