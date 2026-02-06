@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useUsersStore } from '@/stores/users'
 import { storeToRefs } from 'pinia'
+import _ from 'lodash'
 
 const Login = () => import('@/views/Login/Login.vue')
 const Home = () => import('@/views/Home/Home.vue')
@@ -92,10 +93,15 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const usersStore = useUsersStore()
-  const { token } = storeToRefs(usersStore)
-  if (to.meta.auth) { // 需要权限
+  const { token, infos } = storeToRefs(usersStore)
+  if (to.meta.auth && _.isEmpty(infos.value)) { // 需要权限
     if (token.value) {
-      next()
+      usersStore.infosAction().then(res => {
+        if (res.data.errcode === 0) {
+          usersStore.updateInfos(res.data.infos);
+          next()
+        }
+      })
     } else {
       next({ name: 'login' }) // 也可以写成 next('/login')，下同
     }
