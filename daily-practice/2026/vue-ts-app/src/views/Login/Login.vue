@@ -26,15 +26,10 @@
     </el-form>
     <div class="users">
       <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="12" v-for="item in testUsers" :key="item.email">
           <h3>测试账号，<el-button>一键登录</el-button></h3>
-          <p>邮箱：huangrong@imooc.com</p>
-          <p>密码：huangrong</p>
-        </el-col>
-        <el-col :span="12">
-          <h3>测试账号，<el-button>一键登录</el-button></h3>
-          <p>邮箱：hongqigong@imooc.com</p>
-          <p>密码：hongqigong</p>
+          <p>邮箱：{{ item.email }}</p>
+          <p>密码：{{ item.pass }}</p>
         </el-col>
       </el-row>
     </div>
@@ -57,13 +52,31 @@ const ruleForm = reactive<User>({
   pass: ''
 })
 const rules = reactive<FormRules<User>>({
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+  ],
+  pass: [
+    { required: true, message: '请输入密码', trigger: 'blur' }
+  ]
 })
+
+const testUsers: User[] = [
+  {
+    email: 'huangrong@imooc.com',
+    pass: 'huangrong'
+  },
+  {
+    email: 'hongqigong@imooc.com',
+    pass: 'hongqigong'
+  }
+]
 
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      console.log('submit!')
+      console.log('submit!', ruleForm)
     } else {
       console.log('error submit!')
     }
