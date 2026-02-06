@@ -27,7 +27,7 @@
     <div class="users">
       <el-row :gutter="20">
         <el-col :span="12" v-for="item in testUsers" :key="item.email">
-          <h3>测试账号，<el-button>一键登录</el-button></h3>
+          <h3>测试账号，<el-button @click="autoLogin({ email: item.email, pass: item.pass })">一键登录</el-button></h3>
           <p>邮箱：{{ item.email }}</p>
           <p>密码：{{ item.pass }}</p>
         </el-col>
@@ -40,6 +40,12 @@
 import { reactive, ref } from 'vue'
 
 import type { FormInstance, FormRules } from 'element-plus'
+import { useUsersStore } from '@/stores/users'
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+
+const usersStore = useUsersStore()
+const router = useRouter()
 
 interface User {
   email: string
@@ -76,11 +82,25 @@ const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      console.log('submit!', ruleForm)
+      usersStore.loginAction(ruleForm).then((res) => {
+        if (res.data.errcode === 0) {
+          usersStore.updateToken(res.data.token)
+          ElMessage.success('登录成功')
+          router.push('/')
+        } else {
+          ElMessage.error('登录失败')
+        }
+      })
     } else {
       console.log('error submit!')
     }
   })
+}
+
+const autoLogin = (user: User) => {
+  ruleForm.email = user.email
+  ruleForm.pass = user.pass
+  submitForm(ruleFormRef.value)
 }
 </script>
 
