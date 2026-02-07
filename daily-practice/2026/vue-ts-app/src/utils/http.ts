@@ -3,6 +3,7 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { useUsersStore } from '@/stores/users'
 import { storeToRefs } from 'pinia';
 import { ElMessage } from 'element-plus';
+import router from '@/router'
 
 const instance = axios.create({
   baseURL: 'http://localhost:3000/',
@@ -28,6 +29,8 @@ instance.interceptors.response.use(function (response) {
     setTimeout(() => {
       window.location.replace('/login')
     }, 1000)
+  } else if (response.data.errmsg === 'error') {
+    router.push('/500')
   }
   return response;
 }, function (error) {

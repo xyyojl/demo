@@ -70,7 +70,7 @@ const pageCheckList = computed(() => {
 })
 
 const handlePutApply = (_id: string, state: '已通过' | '未通过', applicantid: string) => {
-  checksStore.putApplyAction({ _id, state})
+  checksStore.putApplyAction({ _id, state })
     .then(res => {
       if (res.data.errcode === 0) {
         checksStore.getApplyAction({ approverid: usersInfos.value._id })
