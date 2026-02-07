@@ -53,12 +53,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
-const date = ref(new Date());
-const year = date.value.getFullYear()
-const month = ref(date.value.getMonth() + 1)
+const router = useRouter()
+const route = useRoute()
 
+const date = new Date()
+const year = date.getFullYear()
+const month = ref(Number(route.query.month) || date.getMonth() + 1)
+
+watch(month, () => {
+  router.push({
+    query: {
+      month: month.value
+    }
+  })
+})
 
 </script>
 
