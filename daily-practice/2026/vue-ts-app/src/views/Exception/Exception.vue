@@ -12,11 +12,11 @@
     <el-col :span="12">
       <el-empty v-if="detailMonth.length === 0" description="暂无异常考勤" />
       <el-timeline v-else>
-        <el-timeline-item v-for="item in detailMonth" :key="item[0]" :timestamp="`${year}/${month}/${item[0]}`" placement="top">
+        <el-timeline-item v-for="[day, status] in detailMonth" :key="day" :timestamp="`${year}/${month}/${day}`" placement="top">
           <el-card>
             <el-space>
-              <h4>{{ item[1] }}</h4>
-              <p>考勤详情：{{ renderTime(item[0]) }}</p>
+              <h4>{{ status }}</h4>
+              <p>考勤详情：{{ renderTime(day) }}</p>
             </el-space>
           </el-card>
         </el-timeline-item>
