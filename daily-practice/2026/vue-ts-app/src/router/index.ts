@@ -77,16 +77,28 @@ const routes: Array<RouteRecordRaw> = [
           const { infos: usersInfos } = storeToRefs(usersStore)
           const signsStore = useSignsStore()
           const { infos: signsInfos } = storeToRefs(signsStore)
+          const checksStore = useChecksStore()
+          const { applyList } = storeToRefs(checksStore)
           // 检查是否有打卡记录
           if (_.isEmpty(signsInfos.value)) {
             const res = await signsStore.getTimeAction({ userid: usersInfos.value._id })
             if (res.data.errcode === 0) {
               signsStore.updateInfos(res.data.infos)
               next()
+            } else {
+              return
             }
-          } else {
-            next()
           }
+          // 检查是否有审批记录
+          if (_.isEmpty(applyList.value)) {
+            const res = await checksStore.getApplyAction({ applicantid: usersInfos.value._id })
+            if (res.data.errcode === 0) {
+              checksStore.updateApplyList(res.data.rets)
+            } else {
+              return
+            }
+          }
+          next()
         }
       },
       {
