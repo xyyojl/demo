@@ -137,6 +137,22 @@ const routes: Array<RouteRecordRaw> = [
           title: '我的考勤审批',
           icon: 'finished',
           auth: true
+        },
+        async beforeEnter(to, from, next) {
+          const usersStore = useUsersStore()
+          const { infos: usersInfos } = storeToRefs(usersStore)
+          const checksStore = useChecksStore()
+          const { checkList } = storeToRefs(checksStore)
+          // 检查是否有审批记录
+          if (_.isEmpty(checkList.value)) {
+            const res = await checksStore.getApplyAction({ approverid: usersInfos.value._id })
+            if (res.data.errcode === 0) {
+              checksStore.updateCheckList(res.data.rets)
+              next()
+            }
+          } else {
+            next()
+          }
         }
       }
     ]
