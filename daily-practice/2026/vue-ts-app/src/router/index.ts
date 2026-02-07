@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useUsersStore } from '@/stores/users'
+import { useSignsStore } from '@/stores/signs'
 import { storeToRefs } from 'pinia'
 import _ from 'lodash'
 
@@ -42,6 +43,22 @@ const routes: Array<RouteRecordRaw> = [
           title: '在线打卡签到',
           icon: 'calendar',
           auth: true
+        },
+        async beforeEnter(to, from, next) {
+          const usersStore = useUsersStore()
+          const { infos: usersInfos } = storeToRefs(usersStore)
+          const signsStore = useSignsStore()
+          const { infos: signsInfos } = storeToRefs(signsStore)
+          // 检查是否有打卡记录
+          if (_.isEmpty(signsInfos.value)) {
+            const res = await signsStore.getTimeAction({ userid: usersInfos.value._id })
+            if (res.data.errcode === 0) {
+              signsStore.updateInfos(res.data.infos)
+              next()
+            }
+          } else {
+            next()
+          }
         }
       },
       {
