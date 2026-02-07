@@ -1,6 +1,6 @@
 <template>
   <div class="apply-title">
-    <el-button type="primary">添加审批</el-button>
+    <el-button type="primary" @click="handleOpen">添加审批</el-button>
     <el-space>
       <el-input v-model="searchWord" placeholder="请输入搜索关键词" />
       <el-button type="primary" icon="search">搜索</el-button>
@@ -17,29 +17,87 @@
     <el-table :data="pageApplyList" border>
       <el-table-column prop="applicantname" label="申请人" width="180" />
       <el-table-column prop="reason" label="审批事由" width="180" />
-      <el-table-column prop="time" label="时间" />
+      <el-table-column prop="time" label="时间">
+        <template #default="scope">
+          {{ scope.row.time.join(' - ') }}
+        </template>
+      </el-table-column>
       <el-table-column prop="note" label="备注" />
       <el-table-column prop="approvername" label="审批人" width="180" />
       <el-table-column prop="state" label="状态" width="180" />
     </el-table>
     <el-pagination size="small" background layout="prev, pager, next" :total="filterApplyList.length" :page-size="pageSize" @current-change="handleChange" />
   </div>
+  <el-dialog
+    v-model="dialogVisible"
+    title="添加审批"
+    width="500px"
+    :before-close="handleClose"
+  >
+    <el-form
+      ref="ruleFormRef"
+      :model="ruleForm"
+      :rules="rules"
+      label-width="80px"
+    >
+      <el-form-item label="审批人" prop="approvername">
+        <el-select v-model="ruleForm.approvername" placeholder="请选择审批人">
+          <el-option v-for="item in approverList" :key="(item._id as string)" :label="(item.name as string)" :value="(item.name as string)" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="审批事由" prop="reason">
+        <el-select v-model="ruleForm.reason" placeholder="请选择审批事由">
+          <el-option value="年假" label="年假" />
+          <el-option value="事假" label="事假" />
+          <el-option value="病假" label="病假" />
+          <el-option value="外出" label="外出" />
+          <el-option value="补签卡" label="补签卡" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="时间" prop="time">
+        <el-date-picker
+          v-model="ruleForm.time"
+          type="datetimerange"
+          value-format="YYYY-MM-DD hh:mm:ss"
+          start-placeholder="起始日期"
+          end-placeholder="结束日期"
+        />
+      </el-form-item>
+      <el-form-item label="备注" prop="note">
+        <el-input
+          v-model="ruleForm.note"
+          :autosize="{ minRows: 4, maxRows: 6 }"
+          type="textarea"
+          placeholder="请输入备注" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="resetForm(ruleFormRef)">重置</el-button>
+      <el-button type="primary" @click="submitForm(ruleFormRef)">提交</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useChecksStore } from '@/stores/checks'
+import { useUsersStore } from '@/stores/users'
 import { storeToRefs } from 'pinia'
+import type { DateModelType, FormInstance, FormRules } from 'element-plus'
 
 const checksStore = useChecksStore()
+const { applyList } = storeToRefs(checksStore)
+const usersStore = useUsersStore()
+const { infos: usersInfos } = storeToRefs(usersStore)
 
 const searchWord = ref('')
 const defaultType = '全部'
 const approverType = ref(defaultType)
 const pageSize = ref(2)
 const pageCurrent = ref(1)
+const approverList = computed(() => usersInfos.value.approver as {[index: string]: unknown}[])
 
-const { applyList } = storeToRefs(checksStore)
+
 const filterApplyList = computed(() => {
   return applyList.value.filter(item => {
     return (item.state === approverType.value || approverType.value === defaultType) && (item.note as string).includes(searchWord.value)
@@ -54,6 +112,55 @@ const pageApplyList = computed(() => {
   return filterApplyList.value.slice((pageCurrent.value - 1)*pageSize.value, pageCurrent.value*pageSize.value)
 })
 
+const ruleFormRef = ref<FormInstance>()
+const ruleForm = reactive({
+  applicantid: '',
+  applicantname: '',
+  approverid: '',
+  approvername: '',
+  note: '',
+  reason: '',
+  time: ['', '']
+})
+
+const validatorTime = (rule: unknown, value: [DateModelType, DateModelType], callback: (args?: Error) => void) => {
+  if (!value[0] && !value[1]) {
+    callback(new Error('请选择审批时间'))
+  } else {
+    callback()
+  }
+}
+
+const rules = reactive<FormRules>({
+  approvername: [{ required: true, message: '请选择审批人', trigger: 'blur' }],
+  reason: [{ required: true, message: '请选择请假事由', trigger: 'blur' }],
+  time: [{ required: true, validator: validatorTime, trigger: 'blur' }],
+  note: [{ required: true, message: '请添加审批备注', trigger: 'blur' }],
+})
+
+const dialogVisible = ref(false)
+const handleOpen = () => {
+  dialogVisible.value = true
+}
+const handleClose = () => {
+  dialogVisible.value = false
+}
+
+const submitForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.validate((valid) => {
+    if (valid) {
+      console.log('submit!')
+    } else {
+      console.log('error submit!')
+    }
+  })
+}
+
+const resetForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+}
 </script>
 
 <style scoped lang="scss">
