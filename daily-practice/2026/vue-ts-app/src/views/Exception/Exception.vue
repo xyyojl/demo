@@ -1,6 +1,6 @@
 <template>
   <div class="exception-title">
-    <el-button type="primary">异常处理</el-button>
+    <el-button type="primary" @click="handleToApply">异常处理</el-button>
     <el-space>
       <el-button plain>{{ year }}年</el-button>
       <el-select v-model="month">
@@ -85,6 +85,10 @@ const renderTime = (day: string) => {
   } else {
     return '暂无打卡记录'
   }
+}
+
+const handleToApply = () => {
+  router.push('/apply')
 }
 
 </script>
