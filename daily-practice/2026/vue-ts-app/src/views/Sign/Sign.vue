@@ -27,12 +27,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, watchEffect } from 'vue';
 import { useUsersStore } from '@/stores/users';
 import { useSignsStore } from '@/stores/signs';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { toZero } from '@/utils/common';
 const router = useRouter();
 
 const usersStore = useUsersStore()
@@ -65,6 +66,49 @@ const detailValue = reactive({
 const detailState = reactive({
   type: 'success' as 'success' | 'danger',
   text: '正常' as '正常' | '异常',
+})
+
+watchEffect((reset) => {
+  // 从 signsInfos 拿到对应的月份数据
+  const detailMonth = (signsInfos.value.detail as Record<string, Record<string, unknown>>)[toZero(month.value)]
+  for (const attr in detailMonth) {
+    switch(detailMonth[attr]) {
+      case DetailKey.normal:
+        detailValue.normal++
+        break
+      case DetailKey.absent:
+        detailValue.absent++
+        break
+      case DetailKey.miss:
+        detailValue.miss++
+        break
+      case DetailKey.late:
+        detailValue.late++
+        break
+      case DetailKey.early:
+        detailValue.early++
+        break
+      case DetailKey.lateAndEarly:
+        detailValue.lateAndEarly++
+        break
+    }
+  }
+
+  for (const attr in detailValue) {
+    // 判断异常情况
+    if (attr !== 'normal' && detailValue[attr as keyof typeof detailValue] !== 0) {
+      detailState.type = 'danger'
+      detailState.text = '异常'
+    }
+  }
+  reset(() => {
+    // 重置数据
+    detailState.type = 'success'
+    detailState.text = '正常'
+    for (const attr in detailValue) {
+      detailValue[attr as keyof typeof detailValue] = 0
+    }
+  })
 })
 
 const handleChange = () => {
