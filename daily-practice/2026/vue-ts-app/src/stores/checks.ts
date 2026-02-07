@@ -15,7 +15,8 @@ export type PostApply = {
   approvername: string
   note: string
   reason: string
-  time: [DateModelType, DateModelType]
+
+  time: string[]
 }
 type PutApply = {
   _id: string

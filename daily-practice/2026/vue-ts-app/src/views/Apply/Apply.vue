@@ -83,7 +83,8 @@ import { computed, reactive, ref } from 'vue'
 import { useChecksStore } from '@/stores/checks'
 import { useUsersStore } from '@/stores/users'
 import { storeToRefs } from 'pinia'
-import type { DateModelType, FormInstance, FormRules } from 'element-plus'
+import { ElMessage, type DateModelType, type FormInstance, type FormRules } from 'element-plus'
+import type { PostApply as ApplyList } from '@/stores/checks'
 
 const checksStore = useChecksStore()
 const { applyList } = storeToRefs(checksStore)
@@ -96,7 +97,6 @@ const approverType = ref(defaultType)
 const pageSize = ref(2)
 const pageCurrent = ref(1)
 const approverList = computed(() => usersInfos.value.approver as {[index: string]: unknown}[])
-
 
 const filterApplyList = computed(() => {
   return applyList.value.filter(item => {
@@ -113,7 +113,7 @@ const pageApplyList = computed(() => {
 })
 
 const ruleFormRef = ref<FormInstance>()
-const ruleForm = reactive({
+const ruleForm = reactive<ApplyList>({
   applicantid: '',
   applicantname: '',
   approverid: '',
@@ -150,7 +150,22 @@ const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      console.log('submit!')
+      ruleForm.applicantid = usersInfos.value._id as string
+      ruleForm.applicantname = usersInfos.value.name as string
+      ruleForm.approverid = (approverList.value.find(item => item.name === ruleForm.approvername) as {[index: string]: unknown})._id as string
+      checksStore.postApplyAction(ruleForm).then(res => {
+        if (res.data.errcode === 0) {
+          checksStore.getApplyAction({ applicantid: usersInfos.value._id })
+            .then(res => {
+              if (res.data.errcode === 0) {
+                checksStore.updateApplyList(res.data.rets)
+              }
+            })
+          ElMessage.success('添加审批成功')
+          resetForm(ruleFormRef.value)
+          dialogVisible.value = false
+        }
+      })
     } else {
       console.log('error submit!')
     }
