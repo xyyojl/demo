@@ -10,21 +10,13 @@
   </div>
   <el-row :gutter="20">
     <el-col :span="12">
-      <el-empty v-if="false" description="暂无异常考勤" />
+      <el-empty v-if="detailMonth.length === 0" description="暂无异常考勤" />
       <el-timeline v-else>
-        <el-timeline-item timestamp="2018/4/12" placement="top">
+        <el-timeline-item v-for="item in detailMonth" :key="item[0]" :timestamp="`${year}/${month}/${item[0]}`" placement="top">
           <el-card>
             <el-space>
-              <h4>旷工</h4>
-              <p>考勤详情：暂无打卡记录</p>
-            </el-space>
-          </el-card>
-        </el-timeline-item>
-        <el-timeline-item timestamp="2018/4/12" placement="top">
-          <el-card>
-            <el-space>
-              <h4>旷工</h4>
-              <p>考勤详情：暂无打卡记录</p>
+              <h4>{{ item[1] }}</h4>
+              <p>考勤详情：{{ renderTime(item[0]) }}</p>
             </el-space>
           </el-card>
         </el-timeline-item>
@@ -53,16 +45,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
+import { useSignsStore } from '@/stores/signs'
+import { storeToRefs } from 'pinia'
+import { toZero } from '@/utils/common'
 
 const router = useRouter()
 const route = useRoute()
+const signsStore = useSignsStore()
+const { infos: signsInfos } = storeToRefs(signsStore)
 
 const date = new Date()
 const year = date.getFullYear()
 const month = ref(Number(route.query.month) || date.getMonth() + 1)
+
+// 数据格式 [['01', '旷工']]
+const detailMonth = computed(() => {
+  type DetailMap = Record<string, Record<string, unknown>>
+  // ?? {}: 如果找不到该月份，给一个空对象保底，方便后续直接进行 Object.entries(res)
+  const res = (signsInfos.value.detail as DetailMap)[toZero(month.value)] ?? {}
+  return Object.entries(res).filter(([, value]) => value !== '正常出勤').sort()
+})
 
 watch(month, () => {
   router.push({
@@ -71,6 +76,16 @@ watch(month, () => {
     }
   })
 })
+
+const renderTime = (day: string) => {
+  // 拿到对应的月份，再去拿天
+  const res = (signsInfos.value.time as Record<string, Record<string, unknown>>)[toZero(month.value)]?.[day]
+  if (Array.isArray(res)) {
+    return res.join('-')
+  } else {
+    return '暂无打卡记录'
+  }
+}
 
 </script>
 
