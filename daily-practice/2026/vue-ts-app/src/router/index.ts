@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useUsersStore } from '@/stores/users'
 import { useSignsStore } from '@/stores/signs'
+import { useChecksStore } from '@/stores/checks'
 import { storeToRefs } from 'pinia'
 import _ from 'lodash'
 
@@ -97,6 +98,22 @@ const routes: Array<RouteRecordRaw> = [
           title: '添加考勤审批',
           icon: 'document-add',
           auth: true
+        },
+        async beforeEnter(to, from, next) {
+          const usersStore = useUsersStore()
+          const { infos: usersInfos } = storeToRefs(usersStore)
+          const checksStore = useChecksStore()
+          const { applyList } = storeToRefs(checksStore)
+          // 检查是否有审批记录
+          if (_.isEmpty(applyList.value)) {
+            const res = await checksStore.getApplyAction({ applicantid: usersInfos.value._id })
+            if (res.data.errcode === 0) {
+              checksStore.updateApplyList(res.data.rets)
+              next()
+            }
+          } else {
+            next()
+          }
         }
       },
       {
