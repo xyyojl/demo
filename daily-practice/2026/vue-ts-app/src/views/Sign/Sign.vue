@@ -11,7 +11,7 @@
   </el-descriptions>
   <el-calendar v-model="date">
     <template #header>
-      <el-button type="primary">在线签到</el-button>
+      <el-button type="primary" @click="handlePutTime">在线签到</el-button>
       <el-space>
         <el-button plain>{{ year }}年</el-button>
         <el-select v-model="month" @change="handleChange">
@@ -19,13 +19,26 @@
         </el-select>
       </el-space>
     </template>
+    <template #date-cell="{ data }">
+      <div>{{ renderDate(data.day) }}</div>
+      <div class="show-time">{{ renderTime(data.day) }}</div>
+    </template>
   </el-calendar>
 </template>
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
+import { useUsersStore } from '@/stores/users';
+import { useSignsStore } from '@/stores/signs';
+import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 const router = useRouter();
+
+const usersStore = useUsersStore()
+const { infos: usersInfos } = storeToRefs(usersStore)
+const signsStore = useSignsStore()
+const { infos: signsInfos } = storeToRefs(signsStore)
 
 const date = ref(new Date());
 const year = date.value.getFullYear()
@@ -65,6 +78,26 @@ const handleToException = () => {
     }
   })
 }
+const renderDate = (day: string) => {
+  return day.split('-')[2]
+}
+const renderTime = (day: string) => {
+  const [, month, date] = day.split('-') as [string, string, string]
+  // 使用 Record 类型定义更简洁
+  const timeData = signsInfos.value.time as Record<string, Record<string, unknown>>
+  const res = timeData[month]?.[date]
+
+  if (Array.isArray(res)) {
+    return res.join('-')
+  }
+}
+const handlePutTime = () => {
+  signsStore.putTimeAction({ userid: usersInfos.value._id})
+    .then(res => {
+      signsStore.updateInfos(res.data.infos)
+      ElMessage.success('签到成功')
+    })
+}
 </script>
 
 <style scoped lang="scss">
@@ -73,5 +106,12 @@ const handleToException = () => {
 }
 .el-select {
   width: 80px;
+}
+.show-time{
+  text-align: center;
+  line-height: 40px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 </style>
