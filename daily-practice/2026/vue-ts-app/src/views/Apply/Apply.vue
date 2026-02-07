@@ -82,6 +82,7 @@
 import { computed, reactive, ref } from 'vue'
 import { useChecksStore } from '@/stores/checks'
 import { useUsersStore } from '@/stores/users'
+import { useNewsStore } from '@/stores/news'
 import { storeToRefs } from 'pinia'
 import { ElMessage, type DateModelType, type FormInstance, type FormRules } from 'element-plus'
 import type { PostApply as ApplyList } from '@/stores/checks'
@@ -90,6 +91,7 @@ const checksStore = useChecksStore()
 const { applyList } = storeToRefs(checksStore)
 const usersStore = useUsersStore()
 const { infos: usersInfos } = storeToRefs(usersStore)
+const newsStore = useNewsStore()
 
 const searchWord = ref('')
 const defaultType = '全部'
@@ -161,6 +163,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
                 checksStore.updateApplyList(res.data.rets)
               }
             })
+          newsStore.putRemindAction({ userid: ruleForm.approverid, approver: true })
           ElMessage.success('添加审批成功')
           resetForm(ruleFormRef.value)
           dialogVisible.value = false

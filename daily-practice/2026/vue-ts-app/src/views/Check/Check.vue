@@ -39,6 +39,7 @@
 import { computed, ref } from 'vue'
 import { useChecksStore } from '@/stores/checks'
 import { useUsersStore } from '@/stores/users'
+import { useNewsStore } from '@/stores/news'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 
@@ -46,6 +47,7 @@ const checksStore = useChecksStore()
 const { checkList } = storeToRefs(checksStore)
 const usersStore = useUsersStore()
 const { infos: usersInfos } = storeToRefs(usersStore)
+const newsStore = useNewsStore()
 
 const searchWord = ref('')
 const defaultType = '全部'
@@ -77,7 +79,7 @@ const handlePutApply = (_id: string, state: '已通过' | '未通过', applicant
               checksStore.updateCheckList(res.data.rets)
             }
           })
-        // applicantid 用于消息提醒功能
+        newsStore.putRemindAction({ userid: applicantid, applicant: true })
         ElMessage.success('审批成功')
       }
     })

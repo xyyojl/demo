@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import { useUsersStore } from '@/stores/users'
 import { useSignsStore } from '@/stores/signs'
 import { useChecksStore } from '@/stores/checks'
+import { useNewsStore } from '@/stores/news'
 import { storeToRefs } from 'pinia'
 import _ from 'lodash'
 
@@ -50,16 +51,27 @@ const routes: Array<RouteRecordRaw> = [
           const { infos: usersInfos } = storeToRefs(usersStore)
           const signsStore = useSignsStore()
           const { infos: signsInfos } = storeToRefs(signsStore)
+          const newsStore = useNewsStore()
+          const { info: newsInfo } = storeToRefs(newsStore)
           // 检查是否有打卡记录
           if (_.isEmpty(signsInfos.value)) {
             const res = await signsStore.getTimeAction({ userid: usersInfos.value._id })
             if (res.data.errcode === 0) {
               signsStore.updateInfos(res.data.infos)
-              next()
+            } else {
+              return
             }
-          } else {
-            next()
           }
+          // 检查是否有消息提醒
+          if (_.isEmpty(newsInfo.value)) {
+            const res = await newsStore.getRemindAction({ userid: usersInfos.value._id })
+            if (res.data.errcode === 0) {
+              newsStore.updateInfo(res.data.info)
+            } else {
+              return
+            }
+          }
+          next()
         }
       },
       {
@@ -79,6 +91,8 @@ const routes: Array<RouteRecordRaw> = [
           const { infos: signsInfos } = storeToRefs(signsStore)
           const checksStore = useChecksStore()
           const { applyList } = storeToRefs(checksStore)
+          const newsStore = useNewsStore()
+          const { info: newsInfo } = storeToRefs(newsStore)
           // 检查是否有打卡记录
           if (_.isEmpty(signsInfos.value)) {
             const res = await signsStore.getTimeAction({ userid: usersInfos.value._id })
@@ -94,6 +108,15 @@ const routes: Array<RouteRecordRaw> = [
             const res = await checksStore.getApplyAction({ applicantid: usersInfos.value._id })
             if (res.data.errcode === 0) {
               checksStore.updateApplyList(res.data.rets)
+            } else {
+              return
+            }
+          }
+          // 检查是否有消息提醒
+          if (_.isEmpty(newsInfo.value)) {
+            const res = await newsStore.getRemindAction({ userid: usersInfos.value._id })
+            if (res.data.errcode === 0) {
+              newsStore.updateInfo(res.data.info)
             } else {
               return
             }
@@ -116,16 +139,27 @@ const routes: Array<RouteRecordRaw> = [
           const { infos: usersInfos } = storeToRefs(usersStore)
           const checksStore = useChecksStore()
           const { applyList } = storeToRefs(checksStore)
+          const newsStore = useNewsStore()
+          const { info: newsInfo } = storeToRefs(newsStore)
           // 检查是否有审批记录
           if (_.isEmpty(applyList.value)) {
             const res = await checksStore.getApplyAction({ applicantid: usersInfos.value._id })
             if (res.data.errcode === 0) {
               checksStore.updateApplyList(res.data.rets)
-              next()
+            } else {
+              return
             }
-          } else {
-            next()
           }
+          // 检查是否有申请消息提醒并更新状态
+          if (newsInfo.value.applicant) {
+            const res = await newsStore.putRemindAction({ userid: usersInfos.value._id, applicant: false })
+            if (res.data.errcode === 0) {
+              newsStore.updateInfo(res.data.info)
+            } else {
+              return
+            }
+          }
+          next()
         }
       },
       {
@@ -143,16 +177,27 @@ const routes: Array<RouteRecordRaw> = [
           const { infos: usersInfos } = storeToRefs(usersStore)
           const checksStore = useChecksStore()
           const { checkList } = storeToRefs(checksStore)
+          const newsStore = useNewsStore()
+          const { info: newsInfo } = storeToRefs(newsStore)
           // 检查是否有审批记录
           if (_.isEmpty(checkList.value)) {
             const res = await checksStore.getApplyAction({ approverid: usersInfos.value._id })
             if (res.data.errcode === 0) {
               checksStore.updateCheckList(res.data.rets)
-              next()
+            } else {
+              return
             }
-          } else {
-            next()
           }
+          // 检查是否有审批消息提醒并更新状态
+          if (newsInfo.value.approver) {
+            const res = await newsStore.putRemindAction({ userid: usersInfos.value._id, approver: false })
+            if (res.data.errcode === 0) {
+              newsStore.updateInfo(res.data.info)
+            } else {
+              return
+            }
+          }
+          next()
         }
       }
     ]

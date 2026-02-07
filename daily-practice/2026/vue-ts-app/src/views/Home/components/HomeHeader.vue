@@ -7,12 +7,14 @@
     </span>
     <span class="home-header-title">在线考勤系统</span>
     <el-dropdown>
-      <el-badge>
+      <el-badge :is-dot="isDot">
         <el-icon :size="20"><Bell /></el-icon>
       </el-badge>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item>暂无消息</el-dropdown-item>
+          <el-dropdown-item @click="handleNavigate('/apply')" v-if="newsInfo.applicant">有审批结果消息</el-dropdown-item>
+          <el-dropdown-item @click="handleNavigate('/check')" v-if="newsInfo.approver">有审批请求消息</el-dropdown-item>
+          <el-dropdown-item v-if="!newsInfo.applicant && !newsInfo.approver">暂无消息</el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -31,17 +33,28 @@
 </template>
 
 <script setup lang="ts">
+import { useNewsStore } from '@/stores/news'
 import { useUsersStore } from '@/stores/users'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const usersStore = useUsersStore()
 const { infos } = storeToRefs(usersStore)
+const newsStore = useNewsStore()
+const { info: newsInfo } = storeToRefs(newsStore)
+const isDot = computed(() => ((newsInfo.value.applicant || newsInfo.value.approver) as boolean))
 
 const handleLogout = () => {
   usersStore.clearToken()
   setTimeout(() => {
     window.location.replace('/login')
   }, 500)
+}
+
+const handleNavigate = (path: string) => {
+  router.push(path)
 }
 </script>
 
