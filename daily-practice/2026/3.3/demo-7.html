@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点赞测试题</title>
+    <style>
+        *{margin: 0; padding: 0;}
+        li{ list-style: none;}
+        .wrapper{ width: 200px; margin: 30px auto;}
+        .wrapper i{ font-size: 30px}
+        .wrapper i.active{ color: red}
+    </style>
+    <link rel="stylesheet" href="./iconfont.css">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="text/babel">
+        const app = document.querySelector('#app')
+        const root = ReactDOM.createRoot(app)
+        const { useState } = React
+
+        let Welcome = () => {
+            const [list, setList] = useState([
+                {id: 1, num: 50, checked: false},
+                {id: 2, num: 25, checked: true},
+                {id: 3, num: 67, checked: false}
+            ])
+            const handleChange = (id) => {
+                return () => {
+                    let cloneList = _.cloneDeep(list)
+                    let now = cloneList.find(item => item.id === id)
+                    now.num += now.checked ? -1 : 1
+                    now.checked = !now.checked
+                    setList(cloneList)
+                }
+            }
+            return (
+                <ul className='wrapper'>
+                    {
+                        list.map(item => <li key={item.id}><Like {...item} handleChange={handleChange} /></li>)
+                    }
+                </ul>
+            )
+        }
+
+        let Like = (props) => {
+            const { id, num, checked, handleChange } = props
+            const likeClass = `iconfont icon-dianzan ${checked && 'active'}`
+            return (
+                <span>
+                    <i className={likeClass} onClick={handleChange(id)}></i>
+                    {num}
+                </span>
+            )
+        }
+        
+        let element = (
+            <Welcome />
+        )
+
+        root.render(element)
+    </script>
+</body>
+</html>
